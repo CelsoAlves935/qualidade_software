@@ -1,5 +1,133 @@
 # CHANGELOG
 
+## [0.6.0] - 2026-04-06
+
+### Aula: Testes com VCR e TestContainers
+
+#### Objetivo
+Ensinar como usar o padrão VCR (Video Cassette Recorder) para mockar chamadas HTTP externas e TestContainers para testes de integração com banco de dados local, demonstrando quando usar cada abordagem e como combiná-las.
+
+#### O que é o Padrão VCR
+O padrão VCR (Video Cassette Recorder) é uma técnica de testes onde chamadas HTTP externas são gravadas uma vez e depois reproduzidas (playback) durante os testes. Isso elimina a dependência de serviços externos, tornando os testes:
+
+- **Mais rápidos**: Sem latência de rede
+- **Mais confiáveis**: Sem dependência da disponibilidade do serviço externo
+- **Determinísticos**: Mesma resposta sempre
+- **Offline**: Funcionam sem conexão com internet
+- **CI-Friendly**: Não requerem serviços reais em pipelines
+
+Neste projeto, implementamos o VCR usando **OkHttp MockWebServer**, que permite gravar e reproduzir interações HTTP de forma simples.
+
+#### O que são TestContainers
+TestContainers é uma biblioteca Java que fornece instâncias descartáveis de bancos de dados, message brokers e outros serviços em containers Docker. É ideal para:
+
+- Testes de integração com banco de dados real
+- Testes que precisam de um ambiente realista
+- Desenvolvimento local com validação completa
+
+**Importante**: TestContainers requer Docker e não é adequado para CI/CD sem infraestrutura Docker completa.
+
+#### Quando Usar Cada Abordagem
+
+**Use VCR quando:**
+- Testando integrações com APIs externas (Correios, gateways de pagamento, etc.)
+- Chamadas HTTP/REST para serviços de terceiros
+- Serviços web que você não controla
+- Quando a velocidade do teste é crítica
+
+**Use TestContainers quando:**
+- Testando interações com banco de dados
+- Precisando de um ambiente realista localmente
+- Testando migrações de banco de dados
+- Validando queries complexas
+
+**Use ambos quando:**
+- Sua aplicação usa tanto banco de dados quanto APIs externas
+- Quer testes completos localmente mas rápidos no CI
+
+#### Como Funciona Neste Projeto
+
+**Desenvolvimento Local (com TestContainers + VCR):**
+1. Testes de integração sobem um container MongoDB real com TestContainers
+2. Chamadas HTTP para APIs externas (Correios CEP) usam VCR playback
+3. Validação completa: banco real + mocks de serviços externos
+4. Arquivo: `CorreiosIntegrationTest.java`
+
+**CI/CD (apenas VCR):**
+1. Sem TestContainers (sem necessidade de Docker no CI)
+2. Todos os testes usam VCR playback para chamadas HTTP
+3. Testes rápidos e confiáveis no pipeline
+4. Arquivo: `CorreiosVcrTest.java`
+
+#### O Fluxo de Teste com Correios
+Este projeto demonstra o padrão VCR com um caso de uso real: consulta de endereço por CEP usando a API aberta do ViaCEP (similar aos Correios):
+
+1. **Gravação (Record Mode)**:
+   - Configura VCRHelper com `recordMode = true`
+   - Faz chamada real para `https://viacep.com.br/ws/{cep}/json/`
+   - VCR salva a resposta em arquivo cassette (JSON)
+   
+2. **Playback (Test Mode)**:
+   - Configura VCRHelper com `recordMode = false`
+   - Carrega arquivo cassette
+   - Retorna resposta gravada sem chamada de rede
+
+3. **Arquivos Cassette**:
+   - `src/test/resources/vcr-cassettes/cep_01001000.json` - Praça da Sé, São Paulo
+   - `src/test/resources/vcr-cassettes/cep_20040020.json` - Rua São José, Rio de Janeiro
+   - `src/test/resources/vcr-cassettes/cep_invalid.json` - CEP inválido com erro
+
+#### Como os Testes Funcionam
+
+**Teste Local (CorreiosIntegrationTest):**
+```java
+@SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
+public class CorreiosIntegrationTest {
+    
+    @Container
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:8");
+    
+    // Testa integração completa:
+    // 1. MongoDB real via TestContainers
+    // 2. API Correios mockada via VCR
+}
+```
+
+**Teste CI (CorreiosVcrTest):**
+```java
+public class CorreiosVcrTest {
+    
+    // Testa apenas com VCR:
+    // 1. Sem TestContainers
+    // 2. Sem MongoDB real
+    // 3. Apenas mocks VCR
+    // 4. Rápido e confiável
+}
+```
+
+#### Competências Desenvolvidas
+- Compreensão do padrão VCR e quando aplicá-lo
+- Uso de TestContainers para testes de integração local
+- Mocking de APIs externas com OkHttp MockWebServer
+- Combinação de VCR + TestContainers em testes completos
+- Configuração de perfis diferentes para local vs CI
+- Criação e manutenção de cassetes VCR
+- Testes de integração com serviços externos (Correios/CEP)
+
+#### Arquivos Relacionados
+- Serviço Correios: `src/main/java/com/example/educationalqualityproject/service/CorreiosService.java`
+- Controller Correios: `src/main/java/com/example/educationalqualityproject/controller/CorreiosController.java`
+- Entity Address: `src/main/java/com/example/educationalqualityproject/entity/Address.java`
+- VCR Helper: `src/test/java/com/example/educationalqualityproject/util/VcrHelper.java`
+- Teste Integration (Local): `src/test/java/com/example/educationalqualityproject/integration/CorreiosIntegrationTest.java`
+- Teste VCR (CI): `src/test/java/com/example/educationalqualityproject/vcr/CorreiosVcrTest.java`
+- Cassetes VCR: `src/test/resources/vcr-cassettes/*.json`
+- Workflow CI: `.github/workflows/ci.yml` (configurado para usar apenas testes VCR)
+
+---
+
 ## [0.4.0] - 2026-03-29
 
 ### Aula: Testes Unitarios no CI

@@ -1,0 +1,20 @@
+{
+  "http_interactions": [
+    {
+      "request": {
+        "method": "GET",
+        "uri": "https://viacep.com.br/ws/20040020/json/"
+      },
+      "response": {
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\n  \"cep\": \"20040-020\",\n  \"logradouro\": \"Praça Pio X\",\n  \"complemento\": \"lado ímpar\",\n  \"unidade\": \"\",\n  \"bairro\": \"Centro\",\n  \"localidade\": \"Rio de Janeiro\",\n  \"uf\": \"RJ\",\n  \"estado\": \"Rio de Janeiro\",\n  \"regiao\": \"Sudeste\",\n  \"ibge\": \"3304557\",\n  \"gia\": \"\",\n  \"ddd\": \"21\",\n  \"siafi\": \"6001\"\n}"
+      }
+    }
+  ]
+}

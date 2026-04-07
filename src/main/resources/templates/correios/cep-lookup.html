@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta CEP - Correios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Consulta CEP - Correios</h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/correios/buscar}" method="post">
+                            <div class="mb-3">
+                                <label for="cep" class="form-label">CEP:</label>
+                                <input type="text" class="form-control" id="cep" name="cep" 
+                                       placeholder="Digite o CEP (ex: 01001000)" required 
+                                       pattern="[0-9]{8}" maxlength="8">
+                                <small class="form-text text-muted">Digite apenas os números do CEP</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Buscar Endereço</button>
+                        </form>
+
+                        <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+
+                        <div th:if="${success}" class="mt-4">
+                            <h4 class="text-success">Endereço Encontrado:</h4>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>CEP:</th>
+                                    <td th:text="${address.cep}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Logradouro:</th>
+                                    <td th:text="${address.logradouro}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Complemento:</th>
+                                    <td th:text="${address.complemento}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Bairro:</th>
+                                    <td th:text="${address.bairro}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Cidade:</th>
+                                    <td th:text="${address.localidade}"></td>
+                                </tr>
+                                <tr>
+                                    <th>UF:</th>
+                                    <td th:text="${address.uf}"></td>
+                                </tr>
+                                <tr>
+                                    <th>IBGE:</th>
+                                    <td th:text="${address.ibge}"></td>
+                                </tr>
+                                <tr>
+                                    <th>DDD:</th>
+                                    <td th:text="${address.ddd}"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
